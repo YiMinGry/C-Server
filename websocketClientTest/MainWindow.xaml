@@ -6,10 +6,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:websocketClientTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MGCL" Height="500" Width="800">
     <Grid>
         <TextBox x:Name="RecvBox" HorizontalAlignment="Left" Height="325" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="614" Margin="10,0,0,0"/>
-        <Button x:Name="sendButton" Content="Send" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="668,379,0,0" Click="sendButton_Click" Height="30" RenderTransformOrigin="1.505,0.308"/>
+        <Button x:Name="sendButton" Content="Send" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="668,320,0,0" Click="sendButton_Click" Height="89" RenderTransformOrigin="1.505,0.308"/>
         <TextBox x:Name="sendBox" HorizontalAlignment="Left" Height="47" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="614" Margin="10,362,0,0"/>
 
     </Grid>
