@@ -37,7 +37,7 @@ namespace websocketTest
  
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            webSocketServer = new HttpServer(0000);
+            webSocketServer = new HttpServer(5641);
             webSocketServer.OnGet += (sen, ex) =>
             {
                 var req = ex.Request;
