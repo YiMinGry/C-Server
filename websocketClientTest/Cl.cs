@@ -20,13 +20,15 @@ namespace websocketClientTest
         }
         public void StartConnect()
         {
-            mWebSocket = new WebSocket("ws://192.168.219.114:5641/MGServer");
+            //mWebSocket = new WebSocket("ws://192.168.219.114:5641/MGServer");
+            mWebSocket = new WebSocket("ws://localhost:5641/MGServer");
+
             mWebSocket.OnOpen += (sender, e) =>
             {
                 JObject json = new JObject();
                 json.Add("cmd", "userEnter");
-                json.Add("userName", "user");
-                json.Add("userID", "1");
+                json.Add("ID", "1");
+                json.Add("nickName", "user");
 
                 SendMessage(json.ToString());
             };
