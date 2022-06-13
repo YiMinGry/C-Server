@@ -8,9 +8,8 @@
         mc:Ignorable="d"
         Title="MGServer" Height="500" Width="730">
     <Grid Margin="0,0,0,0">
-        <Button Name ="Start" Content="Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="165" Margin="37,377,0,0" Click="Start_Click" Height="39"/>
-        <Button Name ="Stop" Content="Stop" HorizontalAlignment="Right" VerticalAlignment="Top" Width="165" Margin="0,377,37,0" Click="Stop_Click" Height="39"/>
-        <TextBox Name ="Console" AcceptsReturn="True" Height="343" TextWrapping="Wrap" Text="" IsReadOnly ="True" VerticalAlignment="Top" Margin="10,20,12,0"/>
+        <Button Name ="Stop" Content="Stop" HorizontalAlignment="Right" VerticalAlignment="Top" Width="165" Margin="0,435,10,0" Click="Stop_Click" Height="39"/>
+        <TextBox Name ="Console" AcceptsReturn="True" Height="410" TextWrapping="Wrap" Text="" IsReadOnly ="True" VerticalAlignment="Top" Margin="10,20,12,0"/>
         <!-- TextBox의 AcceptsReturn이 트루이면 엔터키를 먹는 텍스트박스가 됨. IsReadOnly가 트루면 읽기 전용-->
     </Grid>
 </Window>

@@ -5,10 +5,20 @@ using WebSocketSharp.Server;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using MySql.Data.MySqlClient;
-
+using System.Text;
 
 namespace websocketTest
 {
+    public struct userData
+    {
+        public string idx;
+        public string ssID;
+        public string ID;
+        public string nickName;
+        public string coin1;
+        public string coin2;
+    }
+
     public class MGServer : WebSocketBehavior
     {
         string _server = "localhost";
@@ -19,6 +29,8 @@ namespace websocketTest
         string _id = "root";
         string _pw = "root";
         string _connectionAddress = "";
+
+        MainWindow win = MainWindow.getWindow;
 
 
         //유저찾기
@@ -54,6 +66,50 @@ namespace websocketTest
 
             return ret;
         }
+        //유저 데이터 받아오기
+        private userData GetUserInfo(string _id)
+        {
+            userData _info = new userData();
+
+            _info.idx = "";
+
+
+            try
+            {
+                using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
+                {
+                    mysql.Open();
+                    string selectQuery = string.Format($"SELECT * FROM {_infoTable}");
+
+                    MySqlCommand command = new MySqlCommand(selectQuery, mysql);
+                    MySqlDataReader table = command.ExecuteReader();
+
+                    while (table.Read())
+                    {
+                        if (_id.Equals(table["ID"].ToString()))
+                        {
+                            _info.idx = table["idx"].ToString();
+                            _info.ssID = table["ssID"].ToString();
+                            _info.ID = table["ID"].ToString();
+                            _info.nickName = table["nickName"].ToString();
+                            _info.coin1 = table["coin1"].ToString();
+                            _info.coin2 = table["coin2"].ToString();
+
+                            return _info;
+                        }
+                    }
+
+                    table.Close();
+                }
+            }
+            catch (Exception exc)
+            {
+                win.addText("!!!!!" + exc.Message + "\n");
+            }
+
+            return _info;
+        }
+
         // 유저생성
         public bool UserInsert(JObject _data)
         {
@@ -61,187 +117,125 @@ namespace websocketTest
 
             if (_data["ID"].ToString() == "")
             {
-                //MessageBox.Show("공백입니다.");
                 ret = false;
+
+                win.addText("아이디 공백!!!!!" + "\n");
             }
             else
             {
-                if (FindUserInfo(_data["ID"].ToString()) == false)
+                try
                 {
-                    try
+                    using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
                     {
-                        using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
+                        mysql.Open();
+                        string insertQuery = string.Format($"INSERT INTO {_infoTable} (ssID, ID, nickName,coin1, coin2) VALUES ('{_data["ssID"].ToString()}','{_data["ID"].ToString()}','{""}','{1000}','{10}');");
+
+                        MySqlCommand command = new MySqlCommand(insertQuery, mysql);
+
+                        if (command.ExecuteNonQuery() != 1)
                         {
-                            mysql.Open();
-                            string insertQuery = string.Format($"INSERT INTO {_infoTable} (ID, nickName, coin1, coin2) VALUES ('{_data["ID"].ToString()}', '{_data["nickName"].ToString()}','{1000}','{10}');");
-
-                            MySqlCommand command = new MySqlCommand(insertQuery, mysql);
-
-                            if (command.ExecuteNonQuery() != 1)
-                            {
-                                //MessageBox.Show("Failed to insert data.");
-                                ret = false;
-                            }
-
-                            //selectTable();
-
-                            ret = true;
+                            //MessageBox.Show("Failed to insert data.");
+                            ret = false;
                         }
-                    }
-                    catch (Exception exc)
-                    {
-                        //MessageBox.Show(exc.Message);
 
-                        ret = false;
+                        //selectTable();
+
+                        ret = true;
                     }
                 }
-                else
+                catch (Exception exc)
                 {
-                    //MessageBox.Show("중복된 id입니다.");
+
+                    win.addText("!!!!!" + exc.Message + "\n");
                     ret = false;
                 }
             }
             return ret;
         }
+        // 유저닉네임 체크
+        private bool CheckUserNickName(string _id)
+        {
+            bool ret = false;
+            try
+            {
+                using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
+                {
+                    mysql.Open();
+                    string selectQuery = string.Format($"SELECT * FROM {_infoTable}");
 
-        ////수정
-        //private void buttonUpdate_Click()
-        //{
-        //    try
-        //    {
+                    MySqlCommand command = new MySqlCommand(selectQuery, mysql);
+                    MySqlDataReader table = command.ExecuteReader();
 
-        //        using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
-        //        {
-        //            mysql.Open();
-        //            int pos = listViewPhoneBook.SelectedItems[0].Index;
-        //            int index = Convert.ToInt32(listViewPhoneBook.Items[pos].Text);
-        //            string updateQuery = string.Format($"UPDATE {_infoTable}  SET ID = '{textBoxNickName.Text}', nickName = '{textBoxID.Text}' WHERE idx={index};");
+                    while (table.Read())
+                    {
+                        if (_id.Equals(table["ID"].ToString()) && table["nickName"].ToString() != "")
+                        {
+                            ret = true;
+                            break;
+                        }
+                    }
 
-        //            MySqlCommand command = new MySqlCommand(updateQuery, mysql);
+                    table.Close();
+                }
+            }
+            catch (Exception exc)
+            {
+                //MessageBox.Show(exc.Message);
+            }
 
-        //            if (command.ExecuteNonQuery() != 1)
-        //            {
-        //                MessageBox.Show("Failed to delete data.");
-        //            }
+            return ret;
+        }
 
-        //            textBoxID.Text = "";
-        //            textBoxNickName.Text = "";
-        //            textBoxcoin1.Text = "";
-        //            textBoxcoin2.Text = "";
+        //닉네임 수정
+        private void UserNinameUpdate(string _id, string _nName)
+        {
+            try
+            {
 
-        //            selectTable();
-        //        }
-        //    }
-        //    catch (Exception exc)
-        //    {
-        //        //MessageBox.Show(exc.Message);
-        //    }
-        //}
+                using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
+                {
+                    mysql.Open();
 
-        ////삭제
+                    string updateQuery = string.Format($"UPDATE {_infoTable}  SET nickName = '{_nName}' WHERE ID={_id};");
 
-        //private void buttonDelete_Click()
-        //{
-        //    try
-        //    {
-        //        using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
-        //        {
-        //            mysql.Open();
-        //            int pos = listViewPhoneBook.SelectedItems[0].Index;
-        //            int index = Convert.ToInt32(listViewPhoneBook.Items[pos].Text);
+                    MySqlCommand command = new MySqlCommand(updateQuery, mysql);
 
-        //            string deleteQuery = string.Format($"DELETE FROM {_infoTable} WHERE idx={index};");
+                    if (command.ExecuteNonQuery() != 1)
+                    {
+                    }
 
-        //            MySqlCommand command = new MySqlCommand(deleteQuery, mysql);
+                }
+            }
+            catch (Exception exc)
+            {
+                //MessageBox.Show(exc.Message);
+            }
+        }
+        //세션 업데이트
+        private void UserSSIDUpdate(string _id, string _ssID)
+        {
+            try
+            {
 
-        //            if (command.ExecuteNonQuery() != 1)
-        //            {
-        //                MessageBox.Show("Failed to delete data.");
-        //            }
+                using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
+                {
+                    mysql.Open();
 
-        //            textBoxID.Text = "";
-        //            textBoxNickName.Text = "";
-        //            textBoxcoin1.Text = "";
-        //            textBoxcoin2.Text = "";
+                    string updateQuery = string.Format($"UPDATE {_infoTable}  SET ssID = '{_ssID}' WHERE ID={_id};");
 
-        //            selectTable();
-        //        }
-        //    }
-        //    catch (Exception exc)
-        //    {
-        //        MessageBox.Show(exc.Message);
-        //    }
-        //}
+                    MySqlCommand command = new MySqlCommand(updateQuery, mysql);
 
-        ////조회
-        //private void buttonSelect_Click()
-        //{
-        //    selectTable();
-        //}
+                    if (command.ExecuteNonQuery() != 1)
+                    {
+                    }
 
-        ////private void selectTable()
-        ////{
-        ////    try
-        ////    {
-        ////        using (MySqlConnection mysql = new MySqlConnection(_connectionAddress))
-        ////        {
-        ////            mysql.Open();
-        ////            string selectQuery = string.Format($"SELECT * FROM {_infoTable}");
-
-        ////            MySqlCommand command = new MySqlCommand(selectQuery, mysql);
-        ////            MySqlDataReader table = command.ExecuteReader();
-
-        ////            listViewPhoneBook.Items.Clear();
-
-        ////            while (table.Read())
-        ////            {
-        ////                ListViewItem item = new ListViewItem();
-        ////                item.Text = table["idx"].ToString();
-        ////                item.SubItems.Add(table["ID"].ToString());
-        ////                item.SubItems.Add(table["nickName"].ToString());
-        ////                item.SubItems.Add(table["coin1"].ToString());
-        ////                item.SubItems.Add(table["coin2"].ToString());
-
-        ////                listViewPhoneBook.Items.Add(item);
-        ////            }
-
-        ////            table.Close();
-        ////        }
-        ////    }
-        ////    catch (Exception exc)
-        ////    {
-        ////        //MessageBox.Show(exc.Message);
-        ////    }
-        ////}
-
-
-
-        //private void listViewPhoneBook_SelectedIndexChanged()
-        //{
-        //    ListView listview = sender as ListView;
-
-        //    int index = listview.FocusedItem.Index;
-        //    textBoxID.Text = listview.Items[index].SubItems[1].Text;
-        //    textBoxNickName.Text = listview.Items[index].SubItems[2].Text;
-        //    textBoxcoin1.Text = listview.Items[index].SubItems[3].Text;
-        //    textBoxcoin2.Text = listview.Items[index].SubItems[4].Text;
-        //}
-
-        //private void buttonReset_Click()
-        //{
-        //    textBoxID.Text = "";
-        //    textBoxNickName.Text = "";
-        //    textBoxcoin1.Text = "";
-        //    textBoxcoin2.Text = "";
-        //}
-
-        //private void Form1_Load()
-        //{
-
-        //}
-
-
-
+                }
+            }
+            catch (Exception exc)
+            {
+                //MessageBox.Show(exc.Message);
+            }
+        }
 
 
         private string _suffix;
@@ -257,9 +251,8 @@ namespace websocketTest
         }
         protected override void OnMessage(MessageEventArgs e)
         {
-            MainWindow win = MainWindow.getWindow;
-
             var text = e.Data;
+
             win.addText("server recv : " + text + "\n");
             JObject json2 = new JObject();
             json2 = JObject.Parse(text);
@@ -268,6 +261,61 @@ namespace websocketTest
 
             switch (_cmd)
             {
+                case "ssEnter":
+
+                    if (FindUserInfo(json2["ID"].ToString()) == true)
+                    { //기존 유저인지 체크
+
+                        win.addText("기존 유저 접속 " + json2["ID"].ToString() + "\n");
+                        UserSSIDUpdate(json2["ID"].ToString(), ID);
+
+                    }
+                    else
+                    { //신규 유저일경우
+                      //유저 디비에 추가하고
+                        win.addText("신규 유저 접속 " + json2["ID"].ToString() + "\n");
+
+                        json2.Add("ssID", ID);
+                        UserInsert(json2);
+
+                    }
+
+
+                    ////닉네임 설정여부 체크 
+                    //if (CheckUserNickName(json2["ID"].ToString()) == false)
+                    //{//닉네임 설정 안됨 //클라한테 닉네임 설정하라고 패킷 보내줘야함
+
+                    //    JObject SetUserNickNameData = new JObject();
+                    //    SetUserNickNameData.Add("cmd", "SetUserNickName");
+                    //    SetUserNickNameData.Add("retMsg", "닉네임을 설정해주세요");
+                    //    SetUserNickNameData.Add("ssID", ID);
+                    //    SetUserNickNameData.Add("ID", json2["ID"].ToString());
+                    //    Sessions.SendTo(SetUserNickNameData.ToString(), ID);
+
+                    //    return;
+                    //}
+
+
+                    //닉네임까지 이상 없을경우 유저 데이터 클라로 넘겨주기
+                    userData _info = new userData();
+                    _info = GetUserInfo(json2["ID"].ToString());
+
+                    JObject _userData = new JObject();
+                    _userData.Add("cmd", "LoginOK");
+                    _userData.Add("retMsg", "로그인에 성공했습니다.");
+                    _userData.Add("idx", _info.idx);
+                    _userData.Add("ssID", _info.ssID);
+                    _userData.Add("ID", _info.ID);
+                    _userData.Add("nickName", _info.nickName);
+                    _userData.Add("coin1", _info.coin1);
+                    _userData.Add("coin2", _info.coin2);
+                    win.addText("기존 유저 접속 " + _userData.ToString() + "\n");
+
+                    Sessions.SendTo(_userData.ToString(), ID);
+
+                    break;
+
+
                 case "userEnter":
 
                     JObject retJson = new JObject();

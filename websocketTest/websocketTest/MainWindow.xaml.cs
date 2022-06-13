@@ -2,7 +2,7 @@
 using System;
 using System.Windows;
 using WebSocketSharp.Server;
- 
+
 namespace websocketTest
 {
     public partial class MainWindow : Window
@@ -31,23 +31,11 @@ namespace websocketTest
         {
             InitializeComponent();
             g_Main = this;
+
+            Start_Server();
         }
- 
+
         private HttpServer webSocketServer = null;
- 
-        private void Start_Click(object sender, RoutedEventArgs e)
-        {
-            webSocketServer = new HttpServer(5641);
-            webSocketServer.OnGet += (sen, ex) =>
-            {
-                var req = ex.Request;
-                var res = ex.Response;
- 
-            };
-            webSocketServer.AddWebSocketService<MGServer>("/MGServer");
-            webSocketServer.Start();
-            Console.Text += "서버시작\n";
-        }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
@@ -56,6 +44,18 @@ namespace websocketTest
             webSocketServer = null;
             Console.Text += "서버종료\n";
         }
- 
+        private void Start_Server()
+        {
+            webSocketServer = new HttpServer(5641);
+            webSocketServer.OnGet += (sen, ex) =>
+            {
+                var req = ex.Request;
+                var res = ex.Response;
+
+            };
+            webSocketServer.AddWebSocketService<MGServer>("/MGServer");
+            webSocketServer.Start();
+            Console.Text += "서버시작\n";
+        }
     }
- }
+}
