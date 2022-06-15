@@ -6,10 +6,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:websocketTest"
         mc:Ignorable="d"
-        Title="MGServer" Height="500" Width="730">
-    <Grid Margin="0,0,0,0">
-        <Button Name ="Stop" Content="Stop" HorizontalAlignment="Right" VerticalAlignment="Top" Width="165" Margin="0,435,10,0" Click="Stop_Click" Height="39"/>
-        <TextBox Name ="Console" AcceptsReturn="True" Height="410" TextWrapping="Wrap" Text="" IsReadOnly ="True" VerticalAlignment="Top" Margin="10,20,12,0"/>
+        Title="MGServer" Height="510" Width="730">
+    <Grid HorizontalAlignment="Center" Width="730" VerticalAlignment="Center" Height="450">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Name ="Stop" Content="Stop" Margin="556,400,20,20" Click="Stop_Click"/>
+        <TextBox Name ="Console" AcceptsReturn="True" TextWrapping="Wrap" Text="" IsReadOnly ="True" Margin="20,10,20,74" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" HorizontalAlignment="Stretch"/>
         <!-- TextBox의 AcceptsReturn이 트루이면 엔터키를 먹는 텍스트박스가 됨. IsReadOnly가 트루면 읽기 전용-->
     </Grid>
 </Window>
